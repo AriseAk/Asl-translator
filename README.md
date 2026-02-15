@@ -10,6 +10,10 @@ An end-to-end, real-time ASL alphabet translation system that captures hand gest
 
 > 📂 **Project Demo (Google Drive):**
 > https://drive.google.com/drive/folders/1kdAeQlDqMMmtODs30tTJOd7YCJQDquVj?usp=sharing
+> <img width="1869" height="880" alt="image" src="https://github.com/user-attachments/assets/e131e5fe-8cc8-4610-b318-760af0616350" />
+> <img width="1864" height="850" alt="image" src="https://github.com/user-attachments/assets/8a07cbac-2355-4191-845b-98e11dd367c2" />
+
+
 
 *A full working demonstration of the real-time translation pipeline, UI responsiveness, and prediction stabilization can be viewed in the drive folder above.*
 
