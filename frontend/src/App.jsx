@@ -3,27 +3,18 @@ import Galaxy from './components/Galaxy.jsx'
 import './App.css'
 
 function App() {
-  // State
   const [detection, setDetection] = useState('');
   const [confidence, setConfidence] = useState(0);
   const [isActive, setIsActive] = useState(false);
   const [topPredictions, setTopPredictions] = useState([]);
   const [error, setError] = useState('');
   const [stream, setStream] = useState(null);
-  
-  // Refs
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const sessionId = useRef(Math.random().toString(36).substr(2, 9));
-  
-  // Loop Control
   const isProcessing = useRef(false);
   const shouldLoop = useRef(false);
-
-  // Backend URL
   const BACKEND_URL = 'http://localhost:5000';
-
-  // Start webcam
   const startWebcam = async () => {
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -35,7 +26,7 @@ function App() {
       });
 
       setStream(mediaStream);
-      setIsActive(true); // This will trigger the useEffect below
+      setIsActive(true); 
       setError('');
 
     } catch (err) {
@@ -44,10 +35,8 @@ function App() {
     }
   };
 
-  // Stop webcam
   const stopWebcam = () => {
-    setIsActive(false); // This will trigger the useEffect to stop loop
-    
+    setIsActive(false);
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
@@ -56,10 +45,6 @@ function App() {
       videoRef.current.srcObject = null;
     }
   };
-
-  // --- NEW: THE LOOPER EFFECT ---
-  // This watches 'isActive'. When it becomes TRUE, it kicks off the loop.
-  // When it becomes FALSE, it kills the loop.
   useEffect(() => {
     if (isActive) {
       shouldLoop.current = true;
@@ -69,40 +54,28 @@ function App() {
     }
   }, [isActive]);
 
-  // --- THE SMART LOOP ---
   const processLoop = async () => {
-    // 1. Kill switch
     if (!shouldLoop.current) return;
 
-    // 2. Check if busy (Simple Lock)
     if (isProcessing.current) {
-        // Retry in 20ms
         setTimeout(processLoop, 20); 
         return;
     }
 
-    // 3. Lock & Process
-    isProcessing.current = true;
-    
+    isProcessing.current = true; 
     try {
         await captureAndPredict();
     } catch (e) {
         console.error("Loop crashed:", e);
     } finally {
-        // 4. Unlock
         isProcessing.current = false;
-        
-        // 5. Schedule Next Frame (200ms = ~5 FPS)
-        // Only schedule if we are still supposed to be running
         if (shouldLoop.current) {
             setTimeout(processLoop, 200); 
         }
     }
   };
 
-  // Capture frame and send to backend
   const captureAndPredict = async () => {
-    // Note: We check shouldLoop.current instead of isActive to avoid stale state issues
     if (!videoRef.current || !canvasRef.current || !shouldLoop.current) return;
 
     const video = videoRef.current;
@@ -116,7 +89,6 @@ function App() {
     canvas.height = video.videoHeight;
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // 0.6 quality is plenty for ML
     const imageData = canvas.toDataURL('image/jpeg', 0.6);
 
     try {
@@ -144,11 +116,9 @@ function App() {
         setError('');
       }
     } catch (err) {
-       // Ignore fetch errors
     }
   };
 
-  // Reset session
   const resetSession = async () => {
     try {
       await fetch(`${BACKEND_URL}/reset`, {
@@ -164,14 +134,12 @@ function App() {
     }
   };
 
-  // Assign stream to video when ready
   useEffect(() => {
     if (isActive && videoRef.current && stream) {
       videoRef.current.srcObject = stream;
     }
   }, [isActive, stream]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       shouldLoop.current = false;
