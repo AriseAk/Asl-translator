@@ -6,6 +6,15 @@ An end-to-end, real-time ASL alphabet translation system that captures hand gest
 
 ---
 
+## 🎥 Demo
+
+> 📂 **Project Demo (Google Drive):**
+> https://drive.google.com/drive/folders/1kdAeQlDqMMmtODs30tTJOd7YCJQDquVj?usp=sharing
+
+*A full working demonstration of the real-time translation pipeline, UI responsiveness, and prediction stabilization can be viewed in the drive folder above.*
+
+---
+
 ## 🚀 Overview
 
 ASL-Translator is designed as a distributed AI application with a high-performance inference backend and a responsive, visually immersive frontend.
