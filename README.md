@@ -1,63 +1,204 @@
-ASL-Translator 🤟
-An end-to-end, real-time American Sign Language (ASL) alphabet translator. This project utilizes a deep learning pipeline to capture, detect, and classify hand gestures from a live webcam feed, translating them into text instantly.
+# ASL-Translator 🤟
 
-🚀 Overview
-The system is built as a distributed application with a React frontend and a Flask-PyTorch backend. Unlike traditional "shotgun" frame processing, this application uses a Smart Loop architecture to ensure smooth UI performance and high-quality predictions without overwhelming the server.
+**Real-Time American Sign Language (ASL) Alphabet Translator**
 
-Technical Stack
-Frontend: React, Vite, TailwindCSS, OGL (for the Starfield Background).
+An end-to-end, real-time ASL alphabet translation system that captures hand gestures from a live webcam feed and converts them into text instantly using a deep learning inference pipeline.
 
-Backend: Python, Flask, PyTorch.
+---
 
-Models: ResNet50 (Classification), MediaPipe (Hand Localization).
+## 🚀 Overview
 
-🧠 The AI Pipeline
-The translation process happens in three distinct stages:
+ASL-Translator is designed as a distributed AI application with a high-performance inference backend and a responsive, visually immersive frontend.
 
-Hand Localization: The backend uses MediaPipe to detect the presence of a hand in the raw frame. If found, it crops the image to the hand's bounding box. This drastically reduces "visual noise" from the background, allowing the classifier to focus purely on finger positions.
+Unlike traditional frame-sampling systems that send frames at fixed intervals (“shotgun processing”), this project implements a **Smart Loop Architecture** that synchronizes frontend capture with backend inference. This ensures:
 
-Classification: The cropped hand image is passed through a custom-trained ResNet50 neural network. The model was trained using stratified datasets and features a dropout-heavy architecture to improve generalization.
+* Smooth UI rendering
+* Reduced server overload
+* Higher prediction stability
+* Elimination of race conditions
 
-Stabilization: To prevent flickering, the backend maintains a Prediction Stabilizer. It uses a temporal buffer to ensure that a letter is only "confirmed" once it has been consistently predicted across multiple consecutive frames.
+---
 
-🛠️ Key Engineering Features
-Smart Loop Request Locking
-Instead of using a standard interval that fires frames blindly, the frontend implements a request-response lock. A new frame is only captured and sent once the backend has finished processing the previous one. This prevents "race conditions" where older predictions might overwrite newer ones, resulting in a stable, flicker-free user experience.
+## 🧩 Technical Stack
 
-Dynamic Metadata Mapping
-The model is truly self-contained. The .pth weight file includes a metadata dictionary of class names. When the backend starts, it automatically maps its output indices to the correct labels based on the file itself, removing the need for hardcoded class lists and preventing index-mismatch errors.
+**Frontend**
 
-📂 Project Structure
-Plaintext
+* React
+* Vite
+* TailwindCSS
+* OGL (Starfield / Galaxy background rendering)
+
+**Backend**
+
+* Python
+* Flask
+* PyTorch
+
+**Models & CV Tooling**
+
+* ResNet50 → Gesture Classification
+* MediaPipe → Hand Detection & Localization
+
+---
+
+## 🧠 AI Inference Pipeline
+
+The translation pipeline operates in three sequential stages:
+
+### 1️⃣ Hand Localization
+
+* MediaPipe detects the presence of a hand within the incoming webcam frame.
+* If detected, the system extracts the bounding box region.
+* The frame is cropped to isolate the hand.
+
+**Why this matters:**
+Reducing background pixels removes visual noise and ensures the classifier focuses strictly on finger articulation and pose geometry.
+
+---
+
+### 2️⃣ Classification
+
+* The cropped hand image is passed into a custom-trained **ResNet50** model.
+* The network was trained on stratified ASL alphabet datasets.
+* A dropout-heavy architecture was used to improve generalization and reduce overfitting.
+
+**Output:**
+A probability distribution across ASL alphabet classes.
+
+---
+
+### 3️⃣ Prediction Stabilization
+
+Real-time classifiers often produce flickering predictions. To mitigate this:
+
+* The backend maintains a **Temporal Prediction Buffer**.
+* Predictions are accumulated across consecutive frames.
+* A letter is only confirmed once it achieves consistency within the buffer window.
+
+**Result:**
+Stable, human-readable text output without rapid character switching.
+
+---
+
+## 🛠️ Key Engineering Features
+
+### 🔁 Smart Loop Request Locking
+
+Instead of using a fixed interval capture system:
+
+* The frontend sends a frame **only after** the backend finishes processing the previous request.
+* This creates a request-response lock cycle.
+
+**Benefits:**
+
+* Prevents race conditions
+* Avoids stale predictions overwriting new ones
+* Reduces unnecessary compute load
+* Maintains UI smoothness
+
+---
+
+### 🧬 Dynamic Metadata Mapping
+
+The trained model is self-describing.
+
+* The `.pth` weight file embeds a metadata dictionary containing class labels.
+* On backend initialization, label indices are auto-mapped from this metadata.
+
+**Advantages:**
+
+* No hardcoded class lists
+* Eliminates index mismatch bugs
+* Improves portability of trained models
+
+---
+
+## 📂 Project Structure
+
+```
+ASL-Translator/
+│
 ├── backend/
-│   ├── main.py            # Flask API & AI Logic
-│   ├── asl_new.ipynb      # Training Notebook
-│   └── asl_new_resnet50.pth   # Trained Model + Metadata
+│   ├── main.py                # Flask API + Inference Pipeline
+│   ├── asl_new.ipynb          # Model Training Notebook
+│   └── asl_new_resnet50.pth   # Trained Weights + Metadata
+│
 └── frontend/
     ├── src/
-    │   ├── App.jsx        # Smart-Loop UI Logic
-    │   ├── App.css        # Sage/Beige Styled UI
-    │   └── components/    # Galaxy Background Component
-🚥 Getting Started
-Prerequisites
-Python 3.11+
+    │   ├── App.jsx            # Smart Loop Capture Logic
+    │   ├── App.css            # Sage/Beige UI Theme
+    │   └── components/        # Starfield Background (OGL)
+```
 
-Node.js & npm
+---
 
-A CUDA-enabled GPU (optional, but recommended for real-time performance)
+## 🚥 Getting Started
 
-Installation
-Backend Setup:
+### Prerequisites
 
-Bash
+* Python 3.11+
+* Node.js + npm
+* Webcam access
+* CUDA-enabled GPU *(optional but recommended for real-time inference)*
+
+---
+
+## ⚙️ Installation & Setup
+
+### Backend Setup
+
+```bash
 cd backend
-pip install torch torchvision mediapipe flask flask-cors opencv-python pillow
-python main.py
-Frontend Setup:
 
-Bash
+pip install torch torchvision mediapipe flask flask-cors opencv-python pillow
+
+python main.py
+```
+
+---
+
+### Frontend Setup
+
+```bash
 cd frontend
+
 npm install
 npm run dev
-📝 Observations
-While the model shows exceptional performance on standardized datasets, real-world performance is highly dependent on lighting and background neutrality. The system performs best when the hand is well-lit and the background is uncluttered.
+```
+
+The frontend will start on the default Vite development server (typically `localhost:5173`).
+
+---
+
+## 🧪 Performance Observations
+
+* The model achieves high accuracy on standardized datasets.
+* Real-world inference performance depends on environmental factors.
+
+### Optimal Conditions
+
+* Well-lit hand region
+* Neutral / uncluttered background
+* Minimal motion blur
+* Clear finger articulation
+
+### Limiting Factors
+
+* Poor lighting
+* Complex backgrounds
+* Partial hand occlusion
+* Extreme camera angles
+
+---
+
+## 📌 Future Improvements
+
+* Word-level gesture modeling
+* Sequence decoding (LSTM / Transformer integration)
+* Multi-hand detection
+* Mobile deployment (TensorFlow Lite / ONNX)
+* Dataset expansion for robustness
+
+---
+
+**Built to bridge communication gaps using real-time AI.**
